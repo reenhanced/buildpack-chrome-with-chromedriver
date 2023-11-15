@@ -20,8 +20,6 @@ ENV_DIR=$CNB_PLATFORM_DIR/env
 mkdir -p $BUILD_DIR
 mkdir -p $CACHE_DIR
 
-LP_DIR=`cd $(dirname $0); cd ..; pwd`
-
 function error() {
   echo " !     $*" >&2
   exit 1
@@ -44,7 +42,7 @@ if [ ! -f $LAYER_TOML ]; then
   mkdir -p $LAYER_PATH
   cat <<EOF >$LAYER_TOML
 [types]
-launch = false
+launch = true
 build = true
 cache = true
 EOF
@@ -156,29 +154,17 @@ for DEB in $(ls -1 $APT_CACHE_DIR/archives/*.deb); do
   dpkg -x $DEB $BUILD_DIR/apt/
 done
 
-topic "Writing profile script"
-mkdir -p $LAYER_PATH/exec.d/
-cat <<EOF >$LAYER_PATH/exec.d/000_apt.sh
-export PATH="\$HOME/apt/usr/bin:\$PATH"
-export LD_LIBRARY_PATH="\$HOME/apt/usr/lib/x86_64-linux-gnu:\$HOME/apt/usr/lib/i386-linux-gnu:\$HOME/apt/usr/lib:\$LD_LIBRARY_PATH"
-export LIBRARY_PATH="\$HOME/apt/usr/lib/x86_64-linux-gnu:\$HOME/apt/usr/lib/i386-linux-gnu:\$HOME/apt/usr/lib:\$LIBRARY_PATH"
-export INCLUDE_PATH="\$HOME/apt/usr/include:\$HOME/apt/usr/include/x86_64-linux-gnu:\$INCLUDE_PATH"
-export CPATH="\$INCLUDE_PATH"
-export CPPPATH="\$INCLUDE_PATH"
-export PKG_CONFIG_PATH="\$HOME/apt/usr/lib/x86_64-linux-gnu/pkgconfig:\$HOME/apt/usr/lib/i386-linux-gnu/pkgconfig:\$HOME/apt/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"
-EOF
-
 # give environment to later buildpacks
 # Each environment variable gets a separate file
 mkdir -p "$LAYER_PATH/env"
 
-echo "$BUILD_DIR/apt/usr/bin" > "$LAYER_PATH/env/PATH.prepend"
-echo "$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/apt/usr/lib/i386-linux-gnu:$BUILD_DIR/apt/usr/lib" > "$LAYER_PATH/env/LD_LIBRARY_PATH.prepend"
-echo "$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/apt/usr/lib/i386-linux-gnu:$BUILD_DIR/apt/usr/lib" > "$LAYER_PATH/env/LIBRARY_PATH.prepend"
-echo "$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu" > "$LAYER_PATH/env/INCLUDE_PATH.prepend"
-echo "$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu" > "$LAYER_PATH/env/CPATH.prepend"
-echo "$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu" > "$LAYER_PATH/env/CPPPATH.prepend"
-echo "$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/apt/usr/lib/i386-linux-gnu/pkgconfig:$BUILD_DIR/apt/usr/lib/pkgconfig" > "$LAYER_PATH/env/PKG_CONFIG_PATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/bin" > "$LAYER_PATH/env/PATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/apt/usr/lib/i386-linux-gnu:$BUILD_DIR/apt/usr/lib" > "$LAYER_PATH/env/LD_LIBRARY_PATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/apt/usr/lib/i386-linux-gnu:$BUILD_DIR/apt/usr/lib" > "$LAYER_PATH/env/LIBRARY_PATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu" > "$LAYER_PATH/env/INCLUDE_PATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu" > "$LAYER_PATH/env/CPATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu" > "$LAYER_PATH/env/CPPPATH.prepend"
+echo -n "$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/apt/usr/lib/i386-linux-gnu/pkgconfig:$BUILD_DIR/apt/usr/lib/pkgconfig" > "$LAYER_PATH/env/PKG_CONFIG_PATH.prepend"
 
 topic "Rewrite package-config files"
 find $BUILD_DIR/apt -type f -ipath '*/pkgconfig/*.pc' | xargs --no-run-if-empty -n 1 sed -i -e 's!^prefix=\(.*\)$!prefix='"$BUILD_DIR"'/apt\1!g'
@@ -204,15 +190,8 @@ EOF
 chmod +x $BIN_DIR/$SHIM
 cp $BIN_DIR/$SHIM $BIN_DIR/google-chrome
 
-# export the chrome binary location, so it's easier to tell chromedriver
-# about the non-standard location
-cat <<EOF >$LAYER_PATH/exec.d/010_google-chrome.sh
-export GOOGLE_CHROME_BIN="\$BUILD_DIR/apt/opt/google/$BIN"
-export GOOGLE_CHROME_SHIM="\$BUILD_DIR/apt/usr/bin/$SHIM"
-EOF
-
-echo "$BUILD_DIR/apt/opt/google/$BIN" > "$LAYER_PATH/env/GOOGLE_CHROME_BIN"
-echo "$BUILD_DIR/apt/usr/bin/$SHIM" > "$LAYER_PATH/env/GOOGLE_CHROME_SHIM"
+echo -n "$BUILD_DIR/apt/opt/google/$BIN" > "$LAYER_PATH/env/GOOGLE_CHROME_BIN"
+echo -n "$BUILD_DIR/apt/usr/bin/$SHIM" > "$LAYER_PATH/env/GOOGLE_CHROME_SHIM"
 
 ### CHROMEDRIVER
 if [ -f $ENV_DIR/CHROMEDRIVER_VERSION ]; then
@@ -234,6 +213,5 @@ rm -f $ZIP_LOCATION
 indent "Downloaded"
 
 topic "Creating chromedriver export scripts"
-mkdir -p $LAYER_PATH/exec.d
-echo "export PATH=\$PATH:\$BUILD_DIR/bin" >> $LAYER_PATH/exec.d/chromedriver.sh
+echo -n "$BUILD_DIR/bin" > "$LAYER_PATH/env/PATH.append"
 indent "Created"
