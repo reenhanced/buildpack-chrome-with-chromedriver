@@ -1,0 +1,22 @@
+# Buildpack API version
+api = "0.10"
+
+# Buildpack ID and metadata
+[buildpack]
+id = "reenhanced/buildpack-chrome-with-chromedriver"
+version = "0.0.2"
+name = "Buildpack for Google Chrome and chromedriver"
+description = "Buildpack for Headless Google Chrome and chromedriver"
+homepage = "https://github.com/reenhanced/buildpack-chrome-with-chromedriver"
+
+[[stacks]]
+id = "heroku-20"
+
+[[stacks]]
+id = "heroku-22"
+
+[[stacks]]
+id = "io.buildpacks.stacks.bionic"
+
+[[stacks]]
+id = "io.buildpacks.stacks.jammy"
