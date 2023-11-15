@@ -213,5 +213,6 @@ rm -f $ZIP_LOCATION
 indent "Downloaded"
 
 topic "Creating chromedriver export scripts"
-echo -n "$BUILD_DIR/bin" > "$LAYER_PATH/env/PATH.append"
+echo -n "$BIN_DIR" > "$LAYER_PATH/env/PATH.append"
+echo -n "$BIN_DIR/chromedriver" > "$LAYER_PATH/env/CHROMEDRIVER_BIN"
 indent "Created"
