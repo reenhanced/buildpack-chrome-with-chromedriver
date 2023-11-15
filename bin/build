@@ -7,7 +7,7 @@ set -o pipefail
 set -u
 
 # debug
-set -x
+# set -x
 
 # parse and derive params
 LAYER_PATH=$CNB_LAYERS_DIR/google-chrome
@@ -16,6 +16,9 @@ LAYER_TOML=$CNB_LAYERS_DIR/google-chrome.toml
 BUILD_DIR=$LAYER_PATH/build
 CACHE_DIR=$LAYER_PATH/cache
 ENV_DIR=$CNB_PLATFORM_DIR/env
+
+mkdir -p $BUILD_DIR
+mkdir -p $CACHE_DIR
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
@@ -74,7 +77,7 @@ case "$channel" in
 esac
 
 # Install correct dependencies according to $STACK
-case "${STACK}" in
+case "${CNB_STACK_ID}" in
   "heroku-18" | "heroku-20" | "heroku-22")
     # the package list is found by using ci:debug then running ldd $GOOGLE_CHROME_BIN | grep not
     # also look here for more packages/notes https://developers.google.com/web/tools/puppeteer/troubleshooting
@@ -107,7 +110,7 @@ case "${STACK}" in
     "
     ;;
   *)
-    error "STACK must be 'heroku-18', 'heroku-20' or 'heroku-22', not '${STACK}'."
+    error "CNB_STACK_ID must be 'heroku-18', 'heroku-20' or 'heroku-22', not '${STACK}'."
 esac
 
 if [ ! -f $CACHE_DIR/PURGED_CACHE_V1 ]; then
@@ -165,15 +168,7 @@ export CPPPATH="\$INCLUDE_PATH"
 export PKG_CONFIG_PATH="\$HOME/apt/usr/lib/x86_64-linux-gnu/pkgconfig:\$HOME/apt/usr/lib/i386-linux-gnu/pkgconfig:\$HOME/apt/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"
 EOF
 
-export PATH="$BUILD_DIR/apt/usr/bin:$PATH"
-export LD_LIBRARY_PATH="$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/apt/usr/lib/i386-linux-gnu:$BUILD_DIR/apt/usr/lib:$LD_LIBRARY_PATH"
-export LIBRARY_PATH="$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/apt/usr/lib/i386-linux-gnu:$BUILD_DIR/apt/usr/lib:$LIBRARY_PATH"
-export INCLUDE_PATH="$BUILD_DIR/apt/usr/include:$BUILD_DIR/apt/usr/include/x86_64-linux-gnu:$INCLUDE_PATH"
-export CPATH="$INCLUDE_PATH"
-export CPPPATH="$INCLUDE_PATH"
-export PKG_CONFIG_PATH="$BUILD_DIR/apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/apt/usr/lib/i386-linux-gnu/pkgconfig:$BUILD_DIR/apt/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-#give environment to later buildpacks
+# give environment to later buildpacks
 # Each environment variable gets a separate file
 mkdir -p "$LAYER_PATH/env"
 
@@ -193,7 +188,6 @@ topic "Creating google-chrome shims"
 BIN_DIR=$LAYER_PATH/bin
 mkdir -p $BIN_DIR
 
-rm $BIN_DIR/$SHIM
 cat <<EOF >$BIN_DIR/$SHIM
 
 # prevent from any forced shared libraries injection
@@ -212,11 +206,13 @@ cp $BIN_DIR/$SHIM $BIN_DIR/google-chrome
 
 # export the chrome binary location, so it's easier to tell chromedriver
 # about the non-standard location
-cat <<EOF >$BUILD_DIR/exec.d/010_google-chrome.sh
+cat <<EOF >$LAYER_PATH/exec.d/010_google-chrome.sh
 export GOOGLE_CHROME_BIN="\$BUILD_DIR/apt/opt/google/$BIN"
 export GOOGLE_CHROME_SHIM="\$BUILD_DIR/apt/usr/bin/$SHIM"
 EOF
 
+echo "$BUILD_DIR/apt/opt/google/$BIN" > "$LAYER_PATH/env/GOOGLE_CHROME_BIN"
+echo "$BUILD_DIR/apt/usr/bin/$SHIM" > "$LAYER_PATH/env/GOOGLE_CHROME_SHIM"
 
 ### CHROMEDRIVER
 if [ -f $ENV_DIR/CHROMEDRIVER_VERSION ]; then
@@ -238,6 +234,6 @@ rm -f $ZIP_LOCATION
 indent "Downloaded"
 
 topic "Creating chromedriver export scripts"
-mkdir -p $BUILD_DIR/exec.d
-echo "export PATH=\$PATH:\$BUILD_DIR/bin" >> $BUILD_DIR/exec.d/chromedriver.sh
+mkdir -p $LAYER_PATH/exec.d
+echo "export PATH=\$PATH:\$BUILD_DIR/bin" >> $LAYER_PATH/exec.d/chromedriver.sh
 indent "Created"
