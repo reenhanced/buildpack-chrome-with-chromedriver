@@ -17,8 +17,8 @@ channel will be used.
 
 ## Shims and Command Line Flags
 
-This buildpack installs shims that always add `--headless`, `--disable-gpu`, 
-`--no-sandbox`, and `--remote-debugging-port=9222` to any `google-chrome` 
+This buildpack installs shims that always add `--headless`, `--disable-gpu`,
+`--no-sandbox`, and `--remote-debugging-port=9222` to any `google-chrome`
 command as you'll have trouble running Chrome on a Heroku dyno otherwise.
 
 You'll have two of these shims on your path: `google-chrome` and
@@ -28,21 +28,19 @@ the selected channel.
 ## Selenium
 
 To use Selenium with this buildpack, you'll also need Chrome's webdriver.
-This buildpack does not install chromedriver, but there is a
-[chromedriver buildpack](https://github.com/heroku/heroku-buildpack-chromedriver)
-also available.
+This buildpack includes it.
 
 Additionally, chromedriver expects Chrome to be installed at `/usr/bin/google-chrome`,
 but that's a read-only filesystem in a Heroku slug. You'll need to tell Selenium/chromedriver
-that the chrome binary is at `/app/.apt/usr/bin/google-chrome` instead.
+that the chrome binary is at `$GOOGLE_CHROME_SHIM` instead.
 
 To make that easier, this buildpack makes `$GOOGLE_CHROME_BIN`, and
-`$GOOGLE_CHROME_SHIM` available as environment variables. With them, you can 
-use the standard location locally and the custom location on Heroku. An example 
+`$GOOGLE_CHROME_SHIM` available as environment variables. With them, you can
+use the standard location locally and the custom location on Heroku. An example
 configuration for Ruby's Capybara:
 
 ```
-chrome_bin = ENV.fetch('GOOGLE_CHROME_SHIM', nil)
+chrome_bin = ENV.fetch('GOOGLE_CHROME_BIN', nil)
 
 Capybara.register_driver :chrome do |app|
   options = Selenium::WebDriver::Chrome::Options.new
