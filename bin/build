@@ -44,7 +44,7 @@ if [ ! -f $LAYER_TOML ]; then
 [types]
 launch = true
 build = true
-cache = true
+cache = false
 EOF
 fi
 
