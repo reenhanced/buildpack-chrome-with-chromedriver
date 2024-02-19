@@ -4,7 +4,7 @@ api = "0.10"
 # Buildpack ID and metadata
 [buildpack]
 id = "reenhanced/buildpack-chrome-with-chromedriver"
-version = "1.0.1"
+version = "1.0.2"
 name = "Buildpack for Google Chrome and chromedriver"
 description = "Buildpack for Headless Google Chrome and chromedriver"
 homepage = "https://github.com/reenhanced/buildpack-chrome-with-chromedriver"
