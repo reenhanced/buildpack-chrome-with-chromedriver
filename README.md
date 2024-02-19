@@ -55,3 +55,12 @@ end
 
 Capybara.javascript_driver = :chrome
 ```
+
+## Publishing a new release
+(For maintainers)
+
+You can publish a new release to the buildpack registry by running the following commands:
+
+```sh
+pack buildpack package --publish reenhanced/buildpack-chrome-with-chromedriver
+```
