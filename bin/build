@@ -198,12 +198,12 @@ if [ -f $ENV_DIR/CHROMEDRIVER_VERSION ]; then
   VERSION=$(cat $ENV_DIR/CHROMEDRIVER_VERSION)
   topic "Using chromedriver v${VERSION} (set by the env var 'CHROMEDRIVER_VERSION')"
   VERSIONS_URL="https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
-  ZIP_URL=$(curl --silent --show-error --fail --retry 3 --retry-connrefused --connect-timeout 10 "${VERSIONS_URL}" | jq -r '.versions[] | select(.version == "'$VERSION'").downloads.chrome[] | select(.platform == "linux64").url')
+  ZIP_URL=$(curl --silent --show-error --fail --retry 3 --retry-connrefused --connect-timeout 10 "${VERSIONS_URL}" | jq -r '.versions[] | select(.version == "'$VERSION'").downloads.chromedriver[] | select(.platform == "linux64").url')
 else
   topic "Looking up latest chromedriver version"
   LATEST="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
   VERSION=$(curl --silent --show-error --fail --retry 3 --retry-connrefused --connect-timeout 10 "${LATEST}" | jq -r '.channels.Stable.version')
-  ZIP_URL=$(curl --silent --show-error --fail --retry 3 --retry-connrefused --connect-timeout 10 "${LATEST}" | jq -r '.channels.Stable.downloads.chrome[] | select(.platform == "linux64").url')
+  ZIP_URL=$(curl --silent --show-error --fail --retry 3 --retry-connrefused --connect-timeout 10 "${LATEST}" | jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform == "linux64").url')
 fi
 indent "Version $VERSION"
 

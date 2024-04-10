@@ -16,5 +16,5 @@ WORKDIR /app
 
 # Sanitize the environment seen by the buildpack, to prevent reliance on
 # environment variables that won't be present when it's run by Heroku CI.
-RUN env -i PATH=$PATH HOME=$HOME STACK=$STACK CNB_PLATFORM_DIR=/platform /buildpack/bin/detect
-RUN env -i PATH=$PATH HOME=$HOME STACK=$STACK CNB_PLATFORM_DIR=/platform CNB_LAYERS_DIR=/layer /buildpack/bin/build
+RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK CNB_PLATFORM_DIR=/platform /buildpack/bin/detect
+RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK CNB_PLATFORM_DIR=/platform CNB_LAYERS_DIR=/layer /buildpack/bin/build
