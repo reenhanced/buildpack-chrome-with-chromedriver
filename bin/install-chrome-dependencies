@@ -116,7 +116,7 @@ for DEB in $(ls -1 $APT_CACHE_DIR/archives/*.deb); do
   dpkg -x $DEB $BUILD_DIR/.apt/
 done
 
-echo "Writing profile script" | indent
+topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/000_apt.sh
 export PATH="\$HOME/.apt/usr/bin:\$PATH"
@@ -131,6 +131,8 @@ EOF
 # give environment to later buildpacks
 # Each environment variable gets a separate file
 topic "Exporting environment variables"
+
+mkdir -p "$ENV_DIR"
 echo -n "$BUILD_DIR/.apt/usr/bin" > "$ENV_DIR/PATH.prepend"
 echo -n "$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/lib/i386-linux-gnu:$BUILD_DIR/.apt/usr/lib" > "$ENV_DIR/LD_LIBRARY_PATH.prepend"
 echo -n "$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/lib/i386-linux-gnu:$BUILD_DIR/.apt/usr/lib" > "$ENV_DIR/LIBRARY_PATH.prepend"
