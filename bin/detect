@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 # bin/detect $CNB_PLATFORM_DIR $CNB_BUILD_PLAN_PATH
 
-echo "Google Chrome and chromedriver"
+echo "Google Chrome for testing. Based on https://github.com/heroku/heroku-buildpack-chrome-for-testing/"
 exit 0

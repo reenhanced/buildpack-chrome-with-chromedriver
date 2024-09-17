@@ -2,24 +2,25 @@
 
 set -euo pipefail
 
-[ $# -eq 1 ] || { echo "Usage: $0 STACK"; exit 1; }
+STACK_VERSION="${1:?'Error: The stack version number must be specified as the first argument.'}"
 
-STACK="${1}"
-BASE_IMAGE="heroku/${STACK/-/:}-build"
-OUTPUT_IMAGE="google-chrome-test-${STACK}"
+set -x
 
-echo "Building buildpack on stack ${STACK}..."
+docker build --progress=plain --build-arg="STACK_VERSION=${STACK_VERSION}" -t buildpack-chrome-with-chromedriver .
 
-docker build \
-    --build-arg "BASE_IMAGE=${BASE_IMAGE}" \
-    --build-arg "STACK=${STACK}" \
-    ${GOOGLE_CHROME_CHANNEL:+--build-arg "GOOGLE_CHROME_CHANNEL=${GOOGLE_CHROME_CHANNEL}"} \
-    -t "${OUTPUT_IMAGE}" \
-    .
+# Note: All of the container commands must be run via a login bash shell otherwise the profile.d scripts won't be run.
 
-echo "Checking Google Chrome can start and aliases exist..."
+# Check the profile.d scripts correctly added the binaries to PATH.
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --version'
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chromedriver --version'
 
-TEST_COMMAND="for alias in google-chrome{,-${GOOGLE_CHROME_CHANNEL:-stable}} \${GOOGLE_CHROME_BIN} \${GOOGLE_CHROME_SHIM}; do \${alias} --version; done"
-docker run --rm -t "${OUTPUT_IMAGE}" bash -c "set -ex && for f in ~/.profile.d/*; do source \"\$f\"; done && ${TEST_COMMAND}"
+# Check that there are no missing dynamically linked libraries.
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'ldd $(which chrome)'
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'ldd $(which chromedriver)'
 
-echo "Success!"
+# Check Chrome can fully boot in both new and old headless modes.
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --no-sandbox --headless=new --screenshot https://google.com'
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --no-sandbox --headless=old --screenshot https://google.com'
+
+# Display a size breakdown of the directories added by the buildpack to the app.
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'du --human-readable --max-depth=1 /app'
