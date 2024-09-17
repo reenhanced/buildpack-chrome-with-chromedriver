@@ -17,8 +17,8 @@ COPY --chown=non-root-user . /buildpack
 
 # Sanitize the environment seen by the buildpack, to prevent reliance on
 # environment variables that won't be present when it's run by Heroku CI.
-RUN env -i PATH=$PATH HOME=$HOME STACK=$STACK /buildpack/bin/detect /tmp/build
-RUN env -i PATH=$PATH HOME=$HOME STACK=$STACK /buildpack/bin/build /tmp/build /tmp/cache /tmp/env
+RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK /buildpack/bin/detect /tmp/build
+RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK /buildpack/bin/build /tmp/build /tmp/cache /tmp/env
 
 # We must then test against the run image since that has fewer system libraries installed.
 FROM --platform=linux/amd64 heroku/heroku:${STACK_VERSION}

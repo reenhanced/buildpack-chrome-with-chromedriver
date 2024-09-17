@@ -13,10 +13,10 @@
 
 topic "Installing Chrome dependencies"
 
-# Install correct dependencies according to $STACK
+# Install correct dependencies according to $CNB_STACK_ID
 # The package list is validated by bin/test.sh - see its output to identify any missing libraries.
 # Also look here for more packages/notes https://developers.google.com/web/tools/puppeteer/troubleshooting
-case "${STACK}" in
+case "${CNB_STACK_ID}" in
   "heroku-20" | "heroku-22")
     PACKAGES="
       fonts-liberation
@@ -48,7 +48,7 @@ case "${STACK}" in
     "
     ;;
   *)
-    error "STACK must be 'heroku-20', 'heroku-22' or 'heroku-24', not '${STACK}'."
+    error "STACK must be 'heroku-20', 'heroku-22' or 'heroku-24', not '${CNB_STACK_ID}'."
 		# If you see the error above, the future is here. You can probably copy updates
 		# from the latest version of the buildpack at
 		# https://github.com/heroku/heroku-buildpack-chrome-for-testing
