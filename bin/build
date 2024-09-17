@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # bin/build $CNB_LAYERS_DIR $CNB_PLATFORM_DIR $CNB_BP_PLAN_PATH
 
-LAYER_PATH=$CNB_LAYERS_DIR/buildpack-chrome-with-chromedriver
-LAYER_TOML=$CNB_LAYERS_DIR/buildpack-chrome-with-chromedriver.toml
+LAYER_PATH=$CNB_LAYERS_DIR/chrome-with-chromedriver
+LAYER_TOML=$CNB_LAYERS_DIR/chrome-with-chromedriver.toml
 
 BUILD_DIR=$CNB_LAYERS_DIR
 CACHE_DIR=$LAYER_PATH/cache
@@ -108,5 +108,7 @@ echo "export PATH=\$HOME/.chrome-for-testing/chrome-linux64:\$HOME/.chrome-for-t
 export PATH="$BUILD_DIR/.chrome-for-testing/chrome-linux64:$BUILD_DIR/.chrome-for-testing/chromedriver-linux64:$PATH"
 which chrome | indent
 which chromedriver | indent
+
+which chrome > "$ENV_DIR/GOOGLE_CHROME_BIN"
 
 echo "Installed Chrome for Testing $CHANNEL version $VERSION" | indent
