@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Invoke with `source "$BUILDPACK_DIR/bin/install-chrome-dependencies"` from inside `bin/compile`.
+# Invoked with `source "$BUILDPACK_DIR/bin/install-chrome-dependencies"` from inside `bin/build`.
 # This script is mostly copied from:
 #  https://github.com/heroku/heroku-buildpack-google-chrome/blob/master/bin/compile
 
@@ -16,7 +16,7 @@ topic "Installing Chrome dependencies"
 # Install correct dependencies according to $CNB_STACK_ID
 # The package list is validated by bin/test.sh - see its output to identify any missing libraries.
 # Also look here for more packages/notes https://developers.google.com/web/tools/puppeteer/troubleshooting
-case "${CNB_STACK_ID}" in
+case "${STACK}" in
   "heroku-20" | "heroku-22")
     PACKAGES="
       fonts-liberation
@@ -48,7 +48,7 @@ case "${CNB_STACK_ID}" in
     "
     ;;
   *)
-    error "STACK must be 'heroku-20', 'heroku-22' or 'heroku-24', not '${CNB_STACK_ID}'."
+    error "STACK must be 'heroku-20', 'heroku-22' or 'heroku-24', not '${STACK}'."
 		# If you see the error above, the future is here. You can probably copy updates
 		# from the latest version of the buildpack at
 		# https://github.com/heroku/heroku-buildpack-chrome-for-testing

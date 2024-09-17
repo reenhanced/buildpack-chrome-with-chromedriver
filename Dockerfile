@@ -12,13 +12,13 @@ USER root
 # Emulate the platform where root access is not available
 RUN useradd -m non-root-user
 USER non-root-user
-RUN mkdir -p /tmp/build /tmp/cache /tmp/env
+RUN mkdir -p /tmp/build /tmp/build/cache /tmp/build/env
 COPY --chown=non-root-user . /buildpack
 
 # Sanitize the environment seen by the buildpack, to prevent reliance on
 # environment variables that won't be present when it's run by Heroku CI.
-RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK /buildpack/bin/detect /tmp/build
-RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK /buildpack/bin/build /tmp/build /tmp/cache /tmp/env
+RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK CNB_LAYERS_DIR=/tmp/build /buildpack/bin/detect
+RUN env -i PATH=$PATH HOME=$HOME CNB_STACK_ID=$STACK CNB_LAYERS_DIR=/tmp/build /buildpack/bin/build
 
 # We must then test against the run image since that has fewer system libraries installed.
 FROM --platform=linux/amd64 heroku/heroku:${STACK_VERSION}

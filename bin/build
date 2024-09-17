@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
-# bin/compile <build-dir> <cache-dir> <env-dir>
+# bin/build $CNB_LAYERS_DIR $CNB_PLATFORM_DIR $CNB_BP_PLAN_PATH
+
+LAYER_PATH=$CNB_LAYERS_DIR/buildpack-chrome-with-chromedriver
+LAYER_TOML=$CNB_LAYERS_DIR/buildpack-chrome-with-chromedriver.toml
+
+BUILD_DIR=$CNB_LAYERS_DIR
+CACHE_DIR=$LAYER_PATH/cache
+ENV_DIR=$LAYER_PATH/env
+STACK=$CNB_STACK_ID
+
+mkdir -p $BUILD_DIR
+mkdir -p $CACHE_DIR
+
+# If LAYER_TOML doesn't exist, create it
+if [ ! -f $LAYER_TOML ]; then
+  mkdir -p $LAYER_PATH
+  cat <<EOF >$LAYER_TOML
+[types]
+launch = true
+build = true
+cache = false
+EOF
+fi
 
 # Source: https://github.com/heroku/heroku-buildpack-chrome-for-testing/blob/main/bin/compile
 # Copied on: 2024-09-17
@@ -12,9 +34,10 @@ set -o pipefail
 # set -x
 
 # parse and derive params
-BUILD_DIR=$1
-CACHE_DIR=$2
-ENV_DIR=$3
+# MODIFIED: These are defined above
+# BUILD_DIR=$1
+# CACHE_DIR=$2
+# ENV_DIR=$3
 BUILDPACK_DIR="$(cd "$(dirname "$0")"; cd ..; pwd)"
 
 function error() {
