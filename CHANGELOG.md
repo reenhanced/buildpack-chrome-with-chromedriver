@@ -16,3 +16,6 @@ All notable changes to this project will be documented in this file.
 
 ## 2024-09-17
 - Rewrite to base upon https://github.com/heroku/heroku-buildpack-chrome-for-testing
+
+## 2024-12-16
+- Cleanup incorrect paths

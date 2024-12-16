@@ -4,9 +4,10 @@
 LAYER_PATH=$CNB_LAYERS_DIR/chrome-with-chromedriver
 LAYER_TOML=$CNB_LAYERS_DIR/chrome-with-chromedriver.toml
 
-BUILD_DIR=$CNB_LAYERS_DIR
+BUILD_DIR=$LAYER_PATH/build
 CACHE_DIR=$LAYER_PATH/cache
 ENV_DIR=$LAYER_PATH/env
+LAUNCH_DIR=$LAYER_PATH/launch
 STACK=$CNB_STACK_ID
 
 mkdir -p $BUILD_DIR
@@ -59,7 +60,7 @@ function indent() {
 
 topic "Installing Chrome for Testing"
 
-INSTALL_DIR="$BUILD_DIR/.chrome-for-testing"
+INSTALL_DIR=$LAUNCH_DIR
 mkdir -p "$INSTALL_DIR"
 
 # Detect if the old config var is still used
@@ -101,11 +102,10 @@ rm -f "$ZIP_LOCATION"
 source "$BUILDPACK_DIR/bin/install-chrome-dependencies"
 
 echo "Adding executables to PATH" | indent
-mkdir -p "$BUILD_DIR/.profile.d"
-echo "export PATH=\$HOME/.chrome-for-testing/chrome-linux64:\$HOME/.chrome-for-testing/chromedriver-linux64:\$PATH" >> "$BUILD_DIR/.profile.d/chrome-for-testing.sh"
+echo -n "$LAUNCH_DIR/chrome-linux64:$LAUNCH_DIR/chromedriver-linux64:" > "$ENV_DIR/PATH.prepend"
 
 # Verify the executables are actually present
-export PATH="$BUILD_DIR/.chrome-for-testing/chrome-linux64:$BUILD_DIR/.chrome-for-testing/chromedriver-linux64:$PATH"
+export PATH="$LAUNCH_DIR/chrome-linux64:$LAUNCH_DIR/chromedriver-linux64:$PATH"
 which chrome | indent
 which chromedriver | indent
 
