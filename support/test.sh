@@ -18,9 +18,12 @@ docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chromedriver --ve
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'ldd $(which chrome)'
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'ldd $(which chromedriver)'
 
-# Check Chrome can fully boot in both new and old headless modes.
+# Check Chrome can fully boot headless.
+# Note: there is no --headless=old check here. Chrome 132 removed old headless
+# from the main binary, and the unrecognized value silently falls back to new
+# headless, so the check tested nothing. Legacy headless now ships separately as
+# chrome-headless-shell, which this buildpack does not install.
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --no-sandbox --headless=new --screenshot https://google.com'
-docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --no-sandbox --headless=old --screenshot https://google.com'
 
 # Display a size breakdown of the directories added by the buildpack to the layer.
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'du --human-readable --max-depth=2 /layers'
