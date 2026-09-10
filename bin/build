@@ -6,9 +6,23 @@ LAYER_TOML=$CNB_LAYERS_DIR/chrome-with-chromedriver.toml
 
 BUILD_DIR=$LAYER_PATH/build
 CACHE_DIR=$LAYER_PATH/cache
+# Env vars this buildpack exports to later buildpacks and to launch.
 ENV_DIR=$LAYER_PATH/env
 LAUNCH_DIR=$LAYER_PATH/launch
 STACK=$CNB_STACK_ID
+
+# Config vars the user set, which the platform passes in as files here as well
+# as in the environment. This is an input, unlike ENV_DIR above.
+PLATFORM_ENV_DIR=${CNB_PLATFORM_DIR:-}/env
+
+# Reads a user config var from either place, or the empty string if unset.
+function config_var() {
+  if [ -f "$PLATFORM_ENV_DIR/$1" ]; then
+    cat "$PLATFORM_ENV_DIR/$1"
+  else
+    echo -n "${!1:-}"
+  fi
+}
 
 mkdir -p $BUILD_DIR
 mkdir -p $CACHE_DIR
@@ -64,7 +78,7 @@ INSTALL_DIR=$LAUNCH_DIR
 mkdir -p "$INSTALL_DIR"
 
 # Detect if the old config var is still used
-if [ -f "$ENV_DIR/CHROMEDRIVER_VERSION" ]; then
+if [ -n "$(config_var CHROMEDRIVER_VERSION)" ]; then
   error "This buildpack no longer supports CHROMEDRIVER_VERSION config var and must be removed to continue, because this buildpack now installs compatible versions of Chrome & Chromedriver. GOOGLE_CHROME_CHANNEL can be used to set Stable (default), Beta, Dev, or Canary."
 fi
 
@@ -74,8 +88,8 @@ if which chrome; then
 fi
 
 # Detect requested channel or default to stable
-if [ -f "$ENV_DIR/GOOGLE_CHROME_CHANNEL" ]; then
-  channel=$(cat "$ENV_DIR/GOOGLE_CHROME_CHANNEL")
+channel="$(config_var GOOGLE_CHROME_CHANNEL)"
+if [ -n "$channel" ]; then
   echo "Using env var GOOGLE_CHROME_CHANNEL=$channel" | indent
 else
   channel=stable
