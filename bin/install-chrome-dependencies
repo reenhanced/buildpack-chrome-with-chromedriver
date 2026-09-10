@@ -17,7 +17,7 @@ topic "Installing Chrome dependencies"
 # The package list is validated by bin/test.sh - see its output to identify any missing libraries.
 # Also look here for more packages/notes https://developers.google.com/web/tools/puppeteer/troubleshooting
 case "${STACK}" in
-  "heroku-20" | "heroku-22")
+  "heroku-22")
     PACKAGES="
       fonts-liberation
       libasound2
@@ -47,8 +47,25 @@ case "${STACK}" in
       libxrandr2
     "
     ;;
+  "heroku-26")
+    # Ubuntu 26.04 dropped the transitional non-t64 package names that still
+    # existed on 24.04, so atk, atk-bridge and cups must be requested as t64.
+    PACKAGES="
+      fonts-liberation
+      libasound2t64
+      libatk-bridge2.0-0t64
+      libatk1.0-0t64
+      libcups2t64
+      libgbm1
+      libxcomposite1
+      libxdamage1
+      libxfixes3
+      libxkbcommon0
+      libxrandr2
+    "
+    ;;
   *)
-    error "STACK must be 'heroku-20', 'heroku-22' or 'heroku-24', not '${STACK}'."
+    error "STACK must be 'heroku-22', 'heroku-24' or 'heroku-26', not '${STACK}'."
 		# If you see the error above, the future is here. You can probably copy updates
 		# from the latest version of the buildpack at
 		# https://github.com/heroku/heroku-buildpack-chrome-for-testing
