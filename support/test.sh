@@ -8,9 +8,9 @@ set -x
 
 docker build --progress=plain --build-arg="STACK_VERSION=${STACK_VERSION}" -t buildpack-chrome-with-chromedriver .
 
-# Note: All of the container commands must be run via a login bash shell otherwise the profile.d scripts won't be run.
+# Note: All of the container commands must be run via a login bash shell otherwise the layer env vars won't be applied.
 
-# Check the profile.d scripts correctly added the binaries to PATH.
+# Check the layer's env/ directory correctly added the binaries to PATH.
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --version'
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chromedriver --version'
 
@@ -22,5 +22,5 @@ docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'ldd $(which chrom
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --no-sandbox --headless=new --screenshot https://google.com'
 docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'chrome --no-sandbox --headless=old --screenshot https://google.com'
 
-# Display a size breakdown of the directories added by the buildpack to the app.
-docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'du --human-readable --max-depth=1 /app'
+# Display a size breakdown of the directories added by the buildpack to the layer.
+docker run --rm buildpack-chrome-with-chromedriver bash -l -c 'du --human-readable --max-depth=2 /layers'
