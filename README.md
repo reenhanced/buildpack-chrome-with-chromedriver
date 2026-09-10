@@ -181,5 +181,9 @@ version with the buildpack registry.
 To publish by hand instead:
 
 ```sh
-pack buildpack package --publish reenhanced/buildpack-chrome-with-chromedriver
+pack buildpack package --publish reenhanced/buildpack-chrome-with-chromedriver:3.0.0
+pack buildpack register reenhanced/buildpack-chrome-with-chromedriver:3.0.0
 ```
+
+Always include the version tag - without one the image publishes to `latest`,
+which is not what the registry references.
